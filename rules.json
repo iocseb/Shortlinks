@@ -1,0 +1,25 @@
+{
+  "categories": {
+    "social": {
+      "name": "Social Media",
+      "links": {
+        "sfba": "https://sfba.social",
+        "iocx": "https://ioc.exchange"
+      }
+    },
+    "dev": {
+      "name": "Development",
+      "links": {
+        "gh": "https://github.com",
+        "gl": "https://gitlab.com"
+      }
+    },
+    "tools": {
+      "name": "Tools",
+      "links": {
+        "yt": "https://youtube.com",
+        "maps": "https://maps.google.com"
+      }
+    }
+  }
+} 

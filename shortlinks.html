@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Shortlinks</title>
+    <style>
+        :root {
+            --bg-color: #ffffff;
+            --text-color: #333333;
+            --secondary-text: #666666;
+            --hover-bg: #f5f5f5;
+            --border-color: #eeeeee;
+            --success-color: #1B5E20;
+        }
+        
+        [data-theme="dark"] {
+            --bg-color: #1a1a1a;
+            --text-color: #ffffff;
+            --secondary-text: #cccccc;
+            --hover-bg: #2a2a2a;
+            --border-color: #333333;
+            --success-color: #00994D;
+        }
+        
+        body {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            font-family: system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding-bottom: 80px;
+        }
+        .shortlink {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px;
+            border-bottom: 1px solid var(--border-color);
+            cursor: pointer;
+        }
+        .shortlink:hover {
+            background-color: var(--hover-bg);
+        }
+        .key {
+            font-weight: bold;
+            color: var(--text-color);
+            min-width: 120px;
+            text-decoration: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+        .value {
+            color: var(--secondary-text);
+            text-overflow: ellipsis;
+            overflow: hidden;
+            max-width: 600px;
+            text-decoration: none;
+        }
+        .key:hover {
+            color: var(--text-color);
+            opacity: 0.8;
+        }
+        .value:hover {
+            color: var(--text-color);
+            text-decoration: underline;
+        }
+        .header {
+            font-size: 24px;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .theme-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+        .theme-icons {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            height: 24px;
+        }
+        .theme-icons span {
+            color: var(--secondary-text);
+            width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+        }
+        .theme-icons svg {
+            fill: var(--secondary-text);
+            width: 18px;
+            height: 18px;
+        }
+        .theme-toggle input {
+            display: none;
+        }
+        .toggle-switch {
+            position: relative;
+            width: 48px;
+            height: 24px;
+            background-color: var(--secondary-text);
+            border-radius: 12px;
+            transition: background-color 0.3s;
+            cursor: pointer;
+        }
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            left: 2px;
+            top: 2px;
+            width: 20px;
+            height: 20px;
+            background-color: var(--bg-color);
+            border-radius: 50%;
+            transition: transform 0.3s;
+        }
+        #theme-toggle:checked + .toggle-switch {
+            background-color: var(--success-color);
+        }
+        #theme-toggle:checked + .toggle-switch::after {
+            transform: translateX(24px);
+        }
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+            .value {
+                max-width: 200px;
+            }
+        }
+        .category {
+            margin-bottom: 24px;
+        }
+        .category-name {
+            font-size: 18px;
+            color: var(--secondary-text);
+            margin-right: 8px;
+        }
+        .category-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            padding-bottom: 4px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .add-shortlink {
+            margin-top: 32px;
+            padding-top: 16px;
+            border-top: 2px solid var(--border-color);
+        }
+        .add-shortlink h2 {
+            font-size: 18px;
+            margin: 0 0 16px 0;
+            color: var(--text-color);
+        }
+        .form-group {
+            margin-bottom: 12px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 4px;
+            color: var(--secondary-text);
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            background: var(--bg-color);
+            color: var(--text-color);
+        }
+        .form-group select {
+            cursor: pointer;
+        }
+        .add-button {
+            background: var(--success-color);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .add-button:hover {
+            opacity: 0.9;
+        }
+        .error-message {
+            color: #f44336;
+            margin-top: 8px;
+            font-size: 14px;
+        }
+        .custom-tag {
+            font-size: 12px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            background-color: var(--success-color);
+            color: white;
+            margin-left: 8px;
+            font-weight: normal;
+        }
+        .delete-button {
+            background: none;
+            border: none;
+            color: var(--secondary-text);
+            cursor: pointer;
+            padding: 4px 8px;
+            margin-left: 8px;
+            border-radius: 4px;
+            font-size: 14px;
+            opacity: 0;
+            transition: opacity 0.2s, background-color 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            z-index: 1;
+        }
+        .delete-button svg {
+            fill: currentColor;
+        }
+        .shortlink:hover .delete-button {
+            opacity: 1;
+        }
+        .delete-button:hover {
+            background-color: #ff00001a;
+            color: #ff4444;
+        }
+        .category .delete-button {
+            opacity: 0;
+        }
+        .category:hover .delete-button {
+            opacity: 1;
+        }
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal {
+            background-color: var(--bg-color);
+            padding: 24px;
+            border-radius: 8px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        #settingsForm {
+            display: flex;
+            flex-direction: column;
+        }
+        #settingsForm > :nth-child(1) { order: 2; }  /* Remote URL */
+        #settingsForm > :nth-child(2) { order: 1; }  /* Search Engine */
+        #settingsForm > :nth-child(3) { order: 3; }  /* Example Format */
+        #settingsForm > :nth-child(4) { order: 4; }  /* Action Buttons */
+        .modal h2 {
+            margin-top: 0;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+        .action-button {
+            background: var(--success-color);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .action-button#openSettingsModal {
+            background: #2962FF;  /* Material Blue 700 for light mode */
+        }
+        .action-button.secondary {
+            background: var(--secondary-text);
+        }
+        [data-theme="dark"] .action-button#openSettingsModal {
+            background: #2979FF;  /* Material Blue A700 for dark mode */
+        }
+        .action-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 16px;
+            background-color: var(--bg-color);
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .filter-toggles {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-right: 24px;
+        }
+        .filter-select {
+            padding: 4px 8px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            background: var(--bg-color);
+            color: var(--text-color);
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .code-block {
+            background: var(--hover-bg);
+            padding: 12px;
+            border-radius: 4px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            font-size: 12px;
+            color: var(--text-color);
+            margin: 0;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div>Shortlinks</div>
+        <div class="filter-toggles">
+            <select id="filterSelect" class="filter-select">
+                <option value="all">All Shortlinks</option>
+                <option value="builtin">Built-in Only</option>
+                <option value="custom">Custom Only</option>
+            </select>
+        </div>
+        <div class="theme-toggle">
+            <div class="theme-icons">
+                <span>
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12,7c-2.76,0-5,2.24-5,5s2.24,5,5,5s5-2.24,5-5S14.76,7,12,7L12,7z M2,13h2c0.55,0,1-0.45,1-1s-0.45-1-1-1H2 c-0.55,0-1,0.45-1,1S1.45,13,2,13z M20,13h2c0.55,0,1-0.45,1-1s-0.45-1-1-1h-2c-0.55,0-1,0.45-1,1S19.45,13,20,13z M11,2v2 c0,0.55,0.45,1,1,1s1-0.45,1-1V2c0-0.55-0.45-1-1-1S11,1.45,11,2z M11,20v2c0,0.55,0.45,1,1,1s1-0.45,1-1v-2c0-0.55-0.45-1-1-1 C11.45,19,11,19.45,11,20z M5.99,4.58c-0.39-0.39-1.03-0.39-1.41,0c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06 c0.39,0.39,1.03,0.39,1.41,0s0.39-1.03,0-1.41L5.99,4.58z M18.36,16.95c-0.39-0.39-1.03-0.39-1.41,0c-0.39,0.39-0.39,1.03,0,1.41 l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0c0.39-0.39,0.39-1.03,0-1.41L18.36,16.95z M19.42,5.99c0.39-0.39,0.39-1.03,0-1.41 c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06c-0.39,0.39-0.39,1.03,0,1.41s1.03,0.39,1.41,0L19.42,5.99z M7.05,18.36 c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06c-0.39,0.39-0.39,1.03,0,1.41s1.03,0.39,1.41,0L7.05,18.36z"/>
+                    </svg>
+                </span>
+            </div>
+            <input type="checkbox" id="theme-toggle" />
+            <label class="toggle-switch" for="theme-toggle"></label>
+            <div class="theme-icons">
+                <span>
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12,3c-4.97,0-9,4.03-9,9s4.03,9,9,9s9-4.03,9-9c0-0.46-0.04-0.92-0.1-1.36c-0.98,1.37-2.58,2.26-4.4,2.26 c-2.98,0-5.4-2.42-5.4-5.4c0-1.81,0.89-3.42,2.26-4.4C12.92,3.04,12.46,3,12,3L12,3z"/>
+                    </svg>
+                </span>
+            </div>
+        </div>
+    </div>
+    <div id="shortlinks"></div>
+    <div class="action-bar">
+        <button class="action-button" id="openShortlinkModal">
+            + Shortlink
+        </button>
+        <button class="action-button" id="openCategoryModal">
+            + Category
+        </button>
+        <button class="action-button" id="openSettingsModal">
+            Settings
+        </button>
+    </div>
+    <div id="addShortlinkModal" class="modal-overlay">
+        <div class="modal">
+            <h2>Add Shortlink</h2>
+            <form id="addShortlinkForm">
+                <div class="form-group">
+                    <label for="shortlink">Shortlink</label>
+                    <input type="text" id="shortlink" required placeholder="e.g., gh">
+                </div>
+                <div class="form-group">
+                    <label for="url">URL</label>
+                    <input type="url" id="url" required placeholder="e.g., https://github.com">
+                </div>
+                <div class="form-group">
+                    <label for="category">Category</label>
+                    <select id="category" required>
+                        <!-- Categories will be populated by JavaScript -->
+                    </select>
+                </div>
+                <div class="action-buttons">
+                    <button type="submit" class="action-button">Add Shortlink</button>
+                    <button type="button" class="action-button secondary" id="closeShortlinkModal">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+            <div id="errorMessage" class="error-message"></div>
+        </div>
+    </div>
+    
+    <div id="addCategoryModal" class="modal-overlay">
+        <div class="modal">
+            <h2>Add Category</h2>
+            <form id="addCategoryForm">
+                <div class="form-group">
+                    <label for="categoryId">Category ID</label>
+                    <input type="text" id="categoryId" required placeholder="e.g., work">
+                </div>
+                <div class="form-group">
+                    <label for="categoryName">Category Name</label>
+                    <input type="text" id="categoryName" required placeholder="e.g., Work Links">
+                </div>
+                <div class="action-buttons">
+                    <button type="submit" class="action-button">Add Category</button>
+                    <button type="button" class="action-button secondary" id="closeCategoryModal">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+            <div id="categoryErrorMessage" class="error-message"></div>
+        </div>
+    </div>
+    <div id="settingsModal" class="modal-overlay">
+        <div class="modal">
+            <h2>Settings</h2>
+            <form id="settingsForm">
+                <div class="form-group">
+                    <label for="remoteUrl">Remote Rules URL</label>
+                    <input type="url" id="remoteUrl" required placeholder="e.g., https://example.com/rules.json">
+                </div>
+                <div class="form-group">
+                    <label for="searchEngine">Default Search Engine</label>
+                    <select id="searchEngine" required>
+                        <option value="google">Google</option>
+                        <option value="duckduckgo">DuckDuckGo</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Example Rules Format</label>
+                    <pre class="code-block">
+{
+  "categories": {
+    "social": {
+      "name": "Social Media",
+      "links": {
+        "tw": "https://twitter.com",
+        "fb": "https://facebook.com"
+      }
+    },
+    "dev": {
+      "name": "Development",
+      "links": {
+        "gh": "https://github.com"
+      }
+    }
+  }
+}</pre>
+                </div>
+                <div class="action-buttons">
+                    <button type="submit" class="action-button">Save</button>
+                    <button type="button" class="action-button secondary" id="closeSettingsModal">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+            <div id="settingsErrorMessage" class="error-message"></div>
+        </div>
+    </div>
+    <script src="config.js"></script>
+    <script src="shortlinks.js"></script>
+</body>
+</html> 
