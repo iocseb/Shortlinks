@@ -51,20 +51,20 @@ A Chrome extension that provides a convenient way to manage and use shortlinks (
 ### Rules Format 
 ```json
 {
-"categories": {
-"social": {
-"name": "Social Media",
-"links": {
-"tw": "https://twitter.com",
-"fb": "https://facebook.com"
-}
-},
-"dev": {
-"name": "Development",
-"links": {
-"gh": "https://github.com"
-}
-}
-}
+	"categories": {
+		"social": {
+			"name": "Social Media",
+			"links": {
+				"tw": "https://twitter.com",
+				"fb": "https://facebook.com"
+			}
+		},
+		"dev": {
+			"name": "Development",
+			"links": {
+				"gh": "https://github.com"
+			}
+		}
+	}
 }
 ```
